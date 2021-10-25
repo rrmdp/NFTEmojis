@@ -18,6 +18,21 @@
   padding-top: 30px;
 }
 
+.accounts {
+  color: #000;
+  width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  position: absolute;
+  right: 40px;
+  top: 40%;
+  background: #ebebebf2;
+  padding: 8px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 400;
+}
+
 .header {
   margin: 0;
   font-size: 50px;

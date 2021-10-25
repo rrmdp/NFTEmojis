@@ -499,7 +499,11 @@ const particles = {
           <p className="sub-text">
             Each unique. Each beautiful. Each 6 random emojis box.
           </p>
-         
+         {currentAccount && (
+            <div className="accounts">
+              {currentAccount}
+            </div>
+          )}
           {currentAccount === "" ? (
             <button onClick={connectWallet} className="cta-button connect-wallet-button">
               Connect to Wallet
