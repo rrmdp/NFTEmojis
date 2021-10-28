@@ -1,10 +1,12 @@
 import './styles/App.css';
 import twitterLogo from './assets/twitter-logo.svg';
 import loader from './assets/loading.svg';
+import NFTImage from "./components/NFTImage";
 import React, { useEffect, useState } from "react";
 import { ethers } from "ethers";
-import myEpicNft from './utils/MyEpicNFT.json';
+import myEpicNft from './utils/SixEmojisBoxNFT.json';
 import Particles from "react-tsparticles";
+
 
 
 
@@ -13,7 +15,13 @@ const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
 const OPENSEA_LINK = '';
 const TOTAL_MINT_COUNT = 50;
 
-const CONTRACT_ADDRESS = "0xAf9d348DEb0E1029a3a851D160Ae6F0438027a17";
+// const CONTRACT_ADDRESS = "0xAf9d348DEb0E1029a3a851D160Ae6F0438027a17";
+//const CONTRACT_ADDRESS = "0x6bEeadbC629b30da51E40141ae9E38eDf59a94c9";
+// const CONTRACT_ADDRESS = "0x0906714295c290e7d6A96ccc901778c8A85f279b";
+
+const CONTRACT_ADDRESS = "0x2b80154be9C2c47cf4Ea33710adb2F9Da1be5509";
+
+const placeholder = "";
 
 
 
@@ -25,6 +33,10 @@ const App = () => {
 
      const [ confetti, setConfetti] = useState(false);
      const [ mintText, setMintText] = useState("Mint NFT");
+
+     const [totalNFT, setTotalNFT] = useState(0);
+     const [userMintedNFT, setUserMintedNFT] = useState(0);
+     const [base64Image, setBase64Image] = useState(null);
   
 
     
@@ -93,6 +105,14 @@ if (chainId !== rinkebyChainId) {
     }
   }
 
+    // fetch and populate NFT data
+  const fetchNFTNumbers = async (connectedContract) => {
+    const getTotalNFTMinted = await connectedContract.getTotalNFTMintedSoFar();
+    const getUserNFTCount = await connectedContract.getUserNFTMintedSoFar();
+    setUserMintedNFT(getUserNFTCount.toNumber());
+    setTotalNFT(getTotalNFTMinted.toNumber());
+  };
+
 
     // Setup our listener.
   const setupEventListener = async () => {
@@ -106,14 +126,25 @@ if (chainId !== rinkebyChainId) {
         const signer = provider.getSigner();
         const connectedContract = new ethers.Contract(CONTRACT_ADDRESS, myEpicNft.abi, signer);
 
+        fetchNFTNumbers(connectedContract);
+
         // THIS IS THE MAGIC SAUCE.
         // This will essentially "capture" our event when our contract throws it.
         // If you're familiar with webhooks, it's very similar to that!
-        connectedContract.on("NewEpicNFTMinted", (from, tokenId) => {
+        //NewMake6EmojisBoxNFTMinted
+        connectedContract.on("NewMake6EmojisBoxNFTMinted", async (from, tokenId) => {
           console.log(from, tokenId.toNumber())
           console.log(`Hey there! We've minted your NFT and sent it to your wallet. It may be blank right now. It can take a max of 10 min to show up on OpenSea. Here's the link: https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}/${tokenId.toNumber()}`)
           setMinted(`https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}/${tokenId.toNumber()}`);
           setConfetti(true);
+
+          const getBase64MintedSvg = await connectedContract._tokenURI(tokenId);
+          const base64String = getBase64MintedSvg.split(
+            "data:application/json;base64,"
+          )[1];
+          const { image } = JSON.parse(window.atob(base64String));
+
+          setBase64Image(image);
 
           setTimeout(() => {setConfetti(false);},5000);
           
@@ -142,14 +173,15 @@ if (chainId !== rinkebyChainId) {
         const connectedContract = new ethers.Contract(CONTRACT_ADDRESS, myEpicNft.abi, signer);
 
         console.log("Going to pop wallet now to pay gas...")
-        let nftTxn = await connectedContract.makeAnEpicNFT();
- setMinted("");
- setMintText("Minting...");        
-setLoaderClass("minting");
+        let nftTxn = await connectedContract.make6EmojisBoxNFT(); 
+
+        setMinted("");
+        setMintText("Minting...");        
+        setLoaderClass("minting");
         console.log("Minting...please wait.")
         await nftTxn.wait();
 
-      
+        fetchNFTNumbers(connectedContract);
         
         console.log(`Minted, see transaction: https://rinkeby.etherscan.io/tx/${nftTxn.hash}`);
 
@@ -509,9 +541,19 @@ const particles = {
               Connect to Wallet
             </button>
           ) : (
-            <button onClick={askContractToMintNft} className="cta-button connect-wallet-button">
-              {mintText} <img src={loader} className={loaderClass}/>
-            </button>
+            <div>
+             <NFTImage
+              class={loaderClass}
+              placeholder={placeholder}
+              totalNFT={totalNFT}
+              userMinted={userMintedNFT}
+              base64Image={base64Image}
+            />
+            
+              <button onClick={askContractToMintNft} className="cta-button connect-wallet-button">
+                {mintText} <img src={loader} className={loaderClass}/>
+              </button>
+            </div>
           )}
 
           {minted !== "" ?
