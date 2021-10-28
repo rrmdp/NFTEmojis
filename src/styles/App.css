@@ -52,6 +52,7 @@
 }
 
 .cta-button {
+  margin-top: 35px;
   height: 45px;
   border: 0;
   width: auto;
@@ -95,6 +96,14 @@
   font-weight: bold;
 }
 
+.nft-image-wrapper {
+    margin-top: 40px;
+}
+.total-nft, .user-minted-nft {
+    margin: 0 auto;
+    color: #fff;
+}
+
 .nft-card-container {
   display: flex;
   flex-flow: row wrap;
@@ -111,9 +120,13 @@
   
   width: 250px;
   margin: 5px;
-  flex: 0 1 25%;
+  flex: 0 1 20%;
   text-align: center;
   line-height: 75px;
+}
+
+.nft-image-wrapper.minting {
+  display: none;
 }
 
 @media (max-width: 800px) {
@@ -127,7 +140,7 @@
 @media (max-width: 600px) {
     .nft-card-container>div {
        max-width: 80%;
-       flex: 0 1 80%;
+       flex: 0 1 60%;
     }
 }
 .nft-card-item- {
